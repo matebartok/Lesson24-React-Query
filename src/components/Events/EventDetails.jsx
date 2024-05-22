@@ -14,43 +14,60 @@ export default function EventDetails() {
   const { id } = useParams();
 
   const { data, isPending, isError, error } = useQuery({
-    queryKey: ["event", { id: id }],
+    queryKey: ["events", { id: id }],
     queryFn: ({ signal }) => fetchEvent({ signal, id }),
   });
 
-  const { mutate, isPending: isDeletePending, isError: isDeleteError, error: deleteError } = useMutation({
-    mutationFn: () => deleteEvent({id}),
+  const {
+    mutate,
+    isPending: isDeletePending,
+    isError: isDeleteError,
+    error: deleteError,
+  } = useMutation({
+    mutationFn: () => deleteEvent({ id }),
     onSuccess: () => {
-      queryClient.invalidateQueries({queryKey: ["events"]});
+      queryClient.invalidateQueries({ queryKey: ["events"] });
       navigate("/events");
-    }
+    },
   });
 
   function handleDelete() {
-    mutate({id: id})
+    mutate({ id: id });
   }
 
   let content;
 
   if (isPending) {
-    content = <p>Loading event data...</p>;
+    content = (
+      <div id="event-details-content" className="center">
+        <p>Fetching event data...</p>
+      </div>
+    );
   }
 
-  if(isDeletePending) {
-    console.log("deletepending")
-    content = <p>Deleting event...</p>
+  if (isDeletePending) {
+    console.log("deletepending");
+    content = <p>Deleting event...</p>;
   }
 
   if (isError) {
     content = (
-      <ErrorBlock
-        title="An error occurred"
-        message={error.info?.message || "Failed to fetch event data!"}
-      />
+      <div id="event-details-content" className="center">
+        <ErrorBlock
+          title="Failed to load event"
+          message={error.info?.message || "Failed to fetch event data!"}
+        />
+      </div>
     );
   }
 
   if (data && !isDeletePending) {
+    const formattedDate = new Date(data.date).toLocaleDateString("en-US",{
+      day: "numeric",
+      month: "short",
+      year: "numeric"
+    });
+
     content = (
       <article id="event-details">
         <header>
@@ -65,7 +82,9 @@ export default function EventDetails() {
           <div id="event-details-info">
             <div>
               <p id="event-details-location">{data.location}</p>
-              <time dateTime={`Todo-DateT$Todo-Time`}>{data.date} @ {data.time}</time>
+              <time dateTime={`Todo-DateT$Todo-Time`}>
+                {formattedDate} @ {data.time}
+              </time>
             </div>
             <p id="event-details-description">{data.description}</p>
           </div>
