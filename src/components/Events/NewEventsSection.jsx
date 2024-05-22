@@ -12,6 +12,7 @@ export default function NewEventsSection() {
     staleTime: 5000,   // in this time tanstactquery won't send an another request
     // gcTime: 1000 how long data is stored in cache
   });
+  console.log(data)
 
   let content;
 
